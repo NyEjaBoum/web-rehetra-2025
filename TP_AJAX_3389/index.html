@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de nombres</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 300px;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            <label for="mdp">Entrer le mot de passe :</label>
+            <input type="text" id="mdp" placeholder="Entrer votre mot de passe">
+        </div>
+        <br>
+        <label for="nombre">Nombre de chiffres à générer :</label>
+        <input type="number" id="nombre" placeholder="votre nombre de chiffre">
+        <div>
+            <br>
+            <input type="radio" id="pair" name="parite" value="pair" checked>
+            <label for="pair">Pair</label>
+
+            <input type="radio" id="impair" name="parite" value="impair">
+            <label for="impair">Impair</label>
+        </div>
+        <br>
+        <button onclick="genererNombres()">Valider</button>
+    </div>
+
+    <div id="resultat"></div>
+    <div id="message" class="error"></div>
+    <script>
+
+        function extraireNombreDeLURL() {
+            let url = window.location.href;
+            let regex = /(\d+)/;
+            let match = url.match(regex);
+
+            if (match) {
+                return match[0];
+            } else {
+                return null;
+            }
+        }
+
+        function genererNombres() {
+            let nombre = document.getElementById('nombre').value;
+            let mdp = document.getElementById('mdp').value;
+            let message = document.getElementById('message');
+            let parite = document.querySelector('input[name="parite"]:checked').value;
+            message.innerHTML = '';
+
+            var mdpURL = extraireNombreDeLURL();
+
+            if (mdp !== mdpURL) {
+                message.innerHTML = 'Mot de passe incorrect. Veuillez essayer à nouveau.';
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var donnees = JSON.parse(xhr.responseText);
+                    afficherTableau(donnees);
+                }
+            };
+
+            xhr.open('GET', 'generer.php?nombre=' + nombre + '&parite=' + parite, true);
+            xhr.send();
+        }
+
+        function afficherTableau(donnees) {
+            let resultat = document.getElementById('resultat');
+            let html = '<table>';
+            html += '<tr><th>Nombre</th><th>Occurrences</th></tr>';
+
+            for (let nombre in donnees) {
+                html += '<tr>';
+                html += '<td>' + nombre + '</td>';
+                html += '<td>' + donnees[nombre] + '</td>';
+                html += '</tr>';
+            }
+
+            html += '</table>';
+            resultat.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>
